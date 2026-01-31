@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { TutorController } from './tutor.controller';
+import { tutorController } from './tutor.controller';
+import { requireAuth } from '../../middleware/auth.middleware';
 
 const router = Router();
 
-router.get('/', TutorController.getAllTutors);
-router.get('/:id', TutorController.getTutorById);
-router.post('/profile', TutorController.createProfile);
+router.get('/', requireAuth, tutorController.getAllTutors);
+router.post('/', requireAuth, tutorController.createProfile);
+router.get('/:id', requireAuth, tutorController.getTutorById);
 
 export default router;

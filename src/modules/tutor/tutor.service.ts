@@ -1,27 +1,44 @@
 import { prisma } from "../../lib/prisma";
 
-export class TutorService {
-    static async findAll(filters: any) {
-        return prisma.tutorProfile.findMany({
-            where: { role: 'TUTOR' },
-        });
-    }
+const findAllTutors = async () => {
+    console.log("Fetching all tutor profiles");
+    return prisma.tutorProfile.findMany({
+        include: {
+            category: true,
+            availabilitySlots: true,
 
-    static async findById(id: string) {
-        return prisma.tutorProfile.findUnique({
-            where: { id },
-            include: {
-                user: { select: { name: true, email: true, image: true } },
-                category: true,
-                reviews: { include: { student: { select: { name: true } } } },
-            },
-        });
-    }
+            user: { select: { name: true, email: true, image: true } },
+        },
+    });
+};
 
-    static async create(data: any) {
-        return prisma.tutorProfile.create({
-            data,
-            include: { user: true, category: true },
-        });
+const findTutorById = async (id: string) => {
+    return prisma.tutorProfile.findUnique({
+        where: { id },
+        include: {
+            user: { select: { name: true, email: true, image: true } },
+            category: true,
+            availabilitySlots: true,
+        },
+    });
+};
+
+const createTutorProfile = async (data: any, userId: string) => {
+    const existing = await prisma.tutorProfile.findUnique({
+        where: { userId },
+    });
+
+    if (existing) {
+        throw new Error("Profile already exists");
     }
-}
+    return prisma.tutorProfile.create({
+        data: { ...data, userId },
+        include: { user: true, category: true },
+    });
+};
+
+export const tutorService = {
+    findAllTutors,
+    findTutorById,
+    createTutorProfile,
+};
