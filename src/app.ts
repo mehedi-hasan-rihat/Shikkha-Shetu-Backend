@@ -5,6 +5,8 @@ import { toNodeHandler } from 'better-auth/node';
 import { auth } from './lib/auth';
 
 import tutorRoutes from './modules/tutor/tutor.routes';
+import studentRoutes from './modules/student/student.routes';
+import adminRoutes from './modules/admin/admin.routes';
 
 
 dotenv.config();
@@ -22,7 +24,9 @@ app.use(express.json());
 app.all('/api/auth/*', toNodeHandler(auth));
 
 // Module routes
-app.use('/api/tutor', tutorRoutes);
+app.use('/api/tutors', tutorRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 app.get('/', (req, res) => {
