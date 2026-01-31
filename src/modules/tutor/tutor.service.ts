@@ -37,8 +37,46 @@ const createTutorProfile = async (data: any, userId: string) => {
     });
 };
 
+const updateTutorProfile = async (userId: string, data: any) => {
+    return prisma.tutorProfile.update({
+        where: { userId },
+        data,
+        include: { user: true, category: true },
+    });
+};
+
+const updateAvailability = async (userId: string, availabilitySlots: any[]) => {
+    // First get the tutor profile
+    const tutorProfile = await prisma.tutorProfile.findUnique({
+        where: { userId }
+    });
+    
+    if (!tutorProfile) {
+        throw new Error("Tutor profile not found");
+    }
+    
+    // Delete existing slots and create new ones
+    await prisma.availabilitySlot.deleteMany({
+        where: { tutorId: tutorProfile.id }
+    });
+    
+    await prisma.availabilitySlot.createMany({
+        data: availabilitySlots.map(slot => ({
+            ...slot,
+            tutorId: tutorProfile.id
+        }))
+    });
+    
+    return prisma.tutorProfile.findUnique({
+        where: { userId },
+        include: { user: true, category: true, availabilitySlots: true },
+    });
+};
+
 export const tutorService = {
     findAllTutors,
     findTutorById,
     createTutorProfile,
+    updateTutorProfile,
+    updateAvailability,
 };

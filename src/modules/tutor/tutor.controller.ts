@@ -41,8 +41,37 @@ const createProfile = async (req: Request, res: Response) => {
     }
 };
 
+const updateProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id;
+        const tutorData = req.body;
+        
+        delete tutorData.rating;
+        delete tutorData.totalReviews;
+        
+        const profile = await tutorService.updateTutorProfile(userId, tutorData);
+        res.json(profile);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to update profile" });
+    }
+};
+
+const updateAvailability = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id;
+        const { availabilitySlots } = req.body;
+        
+        const profile = await tutorService.updateAvailability(userId, availabilitySlots);
+        res.json(profile);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to update availability" });
+    }
+};
+
 export const tutorController = {
     getAllTutors,
     getTutorById,
     createProfile,
+    updateProfile,
+    updateAvailability,
 };
