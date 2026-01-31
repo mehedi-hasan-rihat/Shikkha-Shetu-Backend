@@ -14,29 +14,26 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  phone         String?
-  status        UserStatus @default(ACTIVE)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  role          UserRole  @default(STUDENT)
-  
+  id               String        @id
+  name             String
+  email            String
+  emailVerified    Boolean       @default(false)
+  image            String?
+  phone            String?
+  status           UserStatus    @default(ACTIVE)
+  role             UserRole      @default(STUDENT)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  sessions         Session[]
+  accounts         Account[]
   // Relations
-  tutorProfile TutorProfile?
-  
+  tutorProfile     TutorProfile?
   // Bookings
-  bookingsMade     Booking[] @relation("BookingsByStudent")   // bookings the student has made
-  bookingsReceived Booking[] @relation("BookingsForTutor")    // bookings the tutor receives
-  
+  bookingsMade     Booking[]     @relation("BookingsByStudent") // bookings the student has made
+  bookingsReceived Booking[]     @relation("BookingsForTutor") // bookings the tutor receives
   // Reviews
-  reviewsWritten   Review[] @relation("ReviewsByStudent")     // reviews the student wrote
-  reviewsReceived  Review[] @relation("ReviewsForTutor")      // reviews the tutor received
+  reviewsWritten   Review[]      @relation("ReviewsByStudent") // reviews the student wrote
+  reviewsReceived  Review[]      @relation("ReviewsForTutor") // reviews the tutor received
 
   @@unique([email])
   @@map("user")
@@ -91,51 +88,49 @@ model Verification {
 }
 
 // Application models
+
 model TutorProfile {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  bio          String?
-  hourlyRate   Float
-  experience   Int
-  subjects     String[]
-  categoryId   String
-  rating       Float    @default(0)
-  totalReviews Int      @default(0)
-  isAvailable  Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category          Category          @relation(fields: [categoryId], references: [id])
+  id                String             @id @default(cuid())
+  userId            String             @unique
+  bio               String?
+  hourlyRate        Float
+  experience        Int
+  subjects          String[]
+  categoryId        String
+  rating            Float              @default(0)
+  totalReviews      Int                @default(0)
+  isAvailable       Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category          Category           @relation(fields: [categoryId], references: [id])
   availabilitySlots AvailabilitySlot[]
-  
+
   @@map("tutor_profile")
 }
 
 model AvailabilitySlot {
-  id            String       @id @default(cuid())
-  tutorId       String
-  dayOfWeek     Int          // 0-6 (Sunday-Saturday)
-  startTime     String       // "09:00"
-  endTime       String       // "17:00"
-  isAvailable   Boolean      @default(true)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  
-  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-  
+  id          String       @id @default(cuid())
+  tutorId     String
+  dayOfWeek   Int // 0-6 (Sunday-Saturday)
+  startTime   String // "09:00"
+  endTime     String // "17:00"
+  isAvailable Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  tutor       TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
   @@unique([tutorId, dayOfWeek, startTime])
   @@map("availability_slot")
 }
 
 model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  
+  id            String         @id @default(cuid())
+  name          String         @unique
+  description   String?
+  createdAt     DateTime       @default(now())
   tutorProfiles TutorProfile[]
-  
+
   @@map("category")
 }
 
@@ -150,11 +145,10 @@ model Booking {
   totalAmount Float
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  
-  student User @relation("BookingsByStudent", fields: [studentId], references: [id])
-  tutor   User @relation("BookingsForTutor", fields: [tutorId], references: [id])
-  review  Review?
-  
+  student     User          @relation("BookingsByStudent", fields: [studentId], references: [id])
+  tutor       User          @relation("BookingsForTutor", fields: [tutorId], references: [id])
+  review      Review?
+
   @@map("booking")
 }
 
@@ -166,11 +160,10 @@ model Review {
   rating    Int
   comment   String?
   createdAt DateTime @default(now())
-  
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  student User    @relation("ReviewsByStudent", fields: [studentId], references: [id])
-  tutor   User    @relation("ReviewsForTutor", fields: [tutorId], references: [id])
-  
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  student   User     @relation("ReviewsByStudent", fields: [studentId], references: [id])
+  tutor     User     @relation("ReviewsForTutor", fields: [tutorId], references: [id])
+
   @@map("review")
 }
 
