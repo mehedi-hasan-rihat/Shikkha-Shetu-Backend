@@ -3,7 +3,15 @@ import { tutorService } from "./tutor.service";
 
 const getAllTutors = async (req: Request, res: Response) => {
     try {
-        const tutors = await tutorService.findAllTutors();
+        const { category, minRate, maxRate, rating } = req.query;
+        const filters: any = {};
+        
+        if (category) filters.category = category as string;
+        if (minRate) filters.minRate = parseFloat(minRate as string);
+        if (maxRate) filters.maxRate = parseFloat(maxRate as string);
+        if (rating) filters.rating = parseFloat(rating as string);
+        
+        const tutors = await tutorService.findAllTutors(filters);
         res.json(tutors);
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch tutors" });

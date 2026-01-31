@@ -4,10 +4,13 @@ import { requireAuth, requireTutor } from '../../middleware/auth.middleware';
 
 const router = Router();
 
-router.get('/', requireAuth, tutorController.getAllTutors);
+// Public routes
+router.get('/', tutorController.getAllTutors);
+router.get('/:id', tutorController.getTutorById);
+
+// Protected routes
 router.post('/', requireAuth, tutorController.createProfile);
-router.get('/:id', requireAuth, tutorController.getTutorById);
-router.put('/profile', requireAuth, tutorController.updateProfile);
-router.put('/availability', requireAuth, tutorController.updateAvailability);
+router.put('/profile', requireAuth, requireTutor, tutorController.updateProfile);
+router.put('/availability', requireAuth, requireTutor, tutorController.updateAvailability);
 
 export default router;

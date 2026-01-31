@@ -1,12 +1,31 @@
 import { prisma } from "../../lib/prisma";
 
-const findAllTutors = async () => {
-    console.log("Fetching all tutor profiles");
+const findAllTutors = async (filters?: {
+    category?: string;
+    minRate?: number;
+    maxRate?: number;
+    rating?: number;
+}) => {
+    
+    const where: any = {};
+    
+    if (filters?.category) {
+        where.category = { name: { contains: filters.category, mode: 'insensitive' } };
+    }
+    if (filters?.minRate || filters?.maxRate) {
+        where.hourlyRate = {};
+        if (filters.minRate) where.hourlyRate.gte = filters.minRate;
+        if (filters.maxRate) where.hourlyRate.lte = filters.maxRate;
+    }
+    if (filters?.rating) {
+        where.rating = { gte: filters.rating };
+    }
+    
     return prisma.tutorProfile.findMany({
+        where,
         include: {
             category: true,
             availabilitySlots: true,
-
             user: { select: { name: true, email: true, image: true } },
         },
     });
