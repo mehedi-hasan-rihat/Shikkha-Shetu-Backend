@@ -7,6 +7,7 @@ import { auth } from './lib/auth';
 import tutorRoutes from './modules/tutor/tutor.routes';
 import studentRoutes from './modules/student/student.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import bookingRoutes from './modules/booking/booking.routes';
 
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.all('/api/auth/*', toNodeHandler(auth));
 app.use('/api/tutors', tutorRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 
 app.get('/', (req, res) => {
