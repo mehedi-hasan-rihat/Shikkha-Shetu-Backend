@@ -9,7 +9,7 @@ router.get('/', requireAuth, requireAdmin, adminController.getDashboard);
 router.get('/users', requireAuth, requireAdmin, adminController.getUsers);
 router.patch('/users/:id', requireAuth, requireAdmin, adminController.updateUserStatus);
 router.get('/bookings', requireAuth, requireAdmin, adminController.getBookings);
-router.get('/categories', requireAuth, requireAdmin, adminController.getCategories);
+router.get('/categories', adminController.getCategories);
 router.post('/categories', requireAuth, adminController.createCategory);
 
 export default router;

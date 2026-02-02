@@ -27,19 +27,59 @@ export const auth = betterAuth({
                 before: async (user, ctx) => {
                     const body = ctx?.body as { role?: "student" | "tutor" };
                     const role = body?.role === "tutor" ? "TUTOR" : "STUDENT";
-                    console.log("USER ROLE", role, user, body);
                     return { data: { ...user, role } };
+                },
+                after: async (user, ctx) => {
+                    if (user.role !== "TUTOR") return;
+
+                    const body = ctx?.body as {
+                        bio?: string;
+                        hourlyRate?: number;
+                        experience?: number;
+                        categoryId?: string;
+                        subjects?: string;
+                        availabilitySlots?: Array<{
+                            dayOfWeek: number;
+                            startTime: string;
+                            endTime: string;
+                        }>;
+                    };
+                                        
+                    // Get first available category or create tutor profile without category
+                    let categoryId = body?.categoryId;
+                    if (!categoryId) {
+                        const firstCategory = await prisma.category.findFirst();
+                        categoryId = firstCategory?.id;
+                    }
+                    
+                    // Create tutor profile
+                    const tutorProfile = await prisma.tutorProfile.create({
+                        data: {
+                            userId: user.id,
+                            bio: body?.bio || null,
+                            hourlyRate: body?.hourlyRate || 0,
+                            experience: body?.experience || 0,
+                            ...(categoryId && { categoryId }),
+                            subjects: body?.subjects ? body.subjects.split(',').map(s => s.trim()) : [],
+                        },
+                    });
+                    
+                    // Create availability slots if provided
+                    if (body?.availabilitySlots && body.availabilitySlots.length > 0) {
+                        await prisma.availabilitySlot.createMany({
+                            data: body.availabilitySlots.map(slot => ({
+                                tutorId: tutorProfile.id,
+                                dayOfWeek: slot.dayOfWeek,
+                                startTime: slot.startTime,
+                                endTime: slot.endTime,
+                            })),
+                        });
+                    }
                 },
             },
         },
     },
 
     trustedOrigins: [
-        process.env.APP_URL || "http://localhost:3000",
-        "http://localhost:4000",
-    ],
+        process.env.APP_URL!, process.env.BETTER_AUTH_URL!    ],
 });
-
-//
-// GOOGLE_CLIENT_ID
-// GOOGLE_CLIENT_SECRET
