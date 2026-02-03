@@ -9,7 +9,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       return res.status(401).json({ error: "Unauthorized - please login" });
     }
     // console.log("Authenticated user:", session.user);
-    req.user = session.user; // attach user to request
+    req.user = { ...session.user, role: session.user.role as any }; // cast role to proper type
     next();
   } catch (err) {
     res.status(401).json({ error: "Session invalid" });
