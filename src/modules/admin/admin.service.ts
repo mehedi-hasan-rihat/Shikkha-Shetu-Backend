@@ -29,6 +29,43 @@ const getDashboardStats = async () => {
     };
 };
 
+const getAdminProfile = async (userId: string) => {
+    return prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+            role: true,
+            status: true,
+            createdAt: true
+        }
+    });
+};
+
+const updateAdminProfile = async (userId: string, data: any) => {
+    return prisma.user.update({
+        where: { id: userId },
+        data: {
+            name: data.name,
+            phone: data.phone,
+            image: data.image
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+            role: true,
+            status: true,
+            createdAt: true
+        }
+    });
+};
+
 const getAllUsers = async () => {
     return prisma.user.findMany({
         select: {
@@ -91,11 +128,43 @@ const createCategory = async (data: { name: string; description?: string }) => {
     });
 };
 
+const updateCategory = async (id: string, data: { name?: string; description?: string }) => {
+    return prisma.category.update({
+        where: { id },
+        data,
+        include: {
+            _count: {
+                select: { tutorProfiles: true }
+            }
+        }
+    });
+};
+
+const deleteCategory = async (id: string) => {
+    // Check if category has tutors
+    const category = await prisma.category.findUnique({
+        where: { id },
+        include: { _count: { select: { tutorProfiles: true } } }
+    });
+    
+    if (category && category._count.tutorProfiles > 0) {
+        throw new Error("Cannot delete category with existing tutors");
+    }
+    
+    return prisma.category.delete({
+        where: { id }
+    });
+};
+
 export const adminService = {
     getDashboardStats,
+    getAdminProfile,
+    updateAdminProfile,
     getAllUsers,
     updateUserStatus,
     getAllBookings,
     getAllCategories,
     createCategory,
+    updateCategory,
+    deleteCategory,
 };

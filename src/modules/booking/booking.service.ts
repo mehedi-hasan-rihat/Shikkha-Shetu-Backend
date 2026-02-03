@@ -18,23 +18,25 @@ const createBooking = async (data: {
         throw new Error('Session date is required');
     }
     
+    // Validate tutor exists and get user ID
+    const tutor = await prisma.tutorProfile.findUnique({
+        where: { id: data.tutorId },
+        include: { user: true }
+    });
+    if (!tutor) {
+        throw new Error('Tutor not found');
+    }
+    
     // Calculate total amount if not provided
     let totalAmount = data.totalAmount;
     if (!totalAmount) {
-        const tutor = await prisma.tutorProfile.findUnique({
-            where: { id: data.tutorId }
-        });
-        if (tutor) {
-            totalAmount = (tutor.hourlyRate * data.duration) / 60;
-        } else {
-            totalAmount = 0;
-        }
+        totalAmount = (tutor.hourlyRate * data.duration) / 60;
     }
     
     return prisma.booking.create({
         data: {
             studentId: data.studentId,
-            tutorId: data.tutorId,
+            tutorId: tutor.userId, // Use the User ID, not TutorProfile ID
             scheduledAt: new Date(scheduledAt),
             duration: data.duration,
             notes: data.notes || null,

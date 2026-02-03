@@ -10,6 +10,27 @@ const getDashboard = async (req: Request, res: Response) => {
     }
 };
 
+const getProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id;
+        const profile = await adminService.getAdminProfile(userId);
+        res.json(profile);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch profile" });
+    }
+};
+
+const updateProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id;
+        const profileData = req.body;
+        const profile = await adminService.updateAdminProfile(userId, profileData);
+        res.json(profile);
+    } catch (error: any) {
+        res.status(500).json({ error: "Failed to update profile", details: error.message });
+    }
+};
+
 const getUsers = async (req: Request, res: Response) => {
     try {
         const users = await adminService.getAllUsers();
@@ -63,11 +84,42 @@ const createCategory = async (req: Request, res: Response) => {
     }
 };
 
+const updateCategory = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ error: "Category ID is required" });
+        }
+        const categoryData = req.body;
+        const category = await adminService.updateCategory(id, categoryData);
+        res.json(category);
+    } catch (error: any) {
+        res.status(500).json({ error: "Failed to update category", details: error.message });
+    }
+};
+
+const deleteCategory = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ error: "Category ID is required" });
+        }
+        await adminService.deleteCategory(id);
+        res.json({ message: "Category deleted successfully" });
+    } catch (error: any) {
+        res.status(500).json({ error: "Failed to delete category", details: error.message });
+    }
+};
+
 export const adminController = {
     getDashboard,
+    getProfile,
+    updateProfile,
     getUsers,
     updateUserStatus,
     getBookings,
     getCategories,
     createCategory,
+    updateCategory,
+    deleteCategory,
 };
