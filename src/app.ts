@@ -36,7 +36,7 @@ app.all('/api/auth/*', toNodeHandler(auth));
 
 // Module routes
 app.use('/api/tutors', tutorRoutes);
-app.use('/api/student', studentRoutes);
+app.use('/api/students', studentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
