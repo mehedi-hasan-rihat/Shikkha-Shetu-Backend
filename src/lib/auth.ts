@@ -81,5 +81,5 @@ export const auth = betterAuth({
     },
 
     trustedOrigins: [
-        process.env.APP_URL!, process.env.BETTER_AUTH_URL!    ],
+        process.env.APP_URL!, process.env.BETTER_AUTH_URL! , "http://localhost:4000"   ],
 });

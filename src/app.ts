@@ -21,6 +21,15 @@ app.use(cors({
 
 app.use(express.json());
 
+// API logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
+
 // Better Auth handles all auth routes
 app.all('/api/auth/*', toNodeHandler(auth));
 
@@ -29,6 +38,7 @@ app.use('/api/tutors', tutorRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/categories', adminRoutes);
 
 
 app.get('/', (req, res) => {

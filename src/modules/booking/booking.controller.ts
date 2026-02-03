@@ -5,10 +5,12 @@ const createBooking = async (req: Request, res: Response) => {
     try {
         const studentId = req.user!.id;
         const bookingData = { ...req.body, studentId };
+        console.log('Creating booking with data:', bookingData);
         const booking = await bookingService.createBooking(bookingData);
         res.status(201).json(booking);
     } catch (error: any) {
-        res.status(500).json({ error: "Failed to create booking" });
+        console.error('Booking creation error:', error);
+        res.status(500).json({ error: "Failed to create booking", details: error.message });
     }
 };
 
