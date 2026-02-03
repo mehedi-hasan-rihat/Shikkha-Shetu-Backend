@@ -6,6 +6,8 @@ const router = Router();
 
 // Protected routes (specific routes first)
 router.get('/profile', requireAuth, requireTutor, tutorController.getProfile);
+router.get('/bookings', requireAuth, requireTutor, tutorController.getBookings);
+router.patch('/bookings/:id/complete', requireAuth, requireTutor, tutorController.completeBooking);
 router.put('/profile', requireAuth, requireTutor, tutorController.updateProfile);
 router.get('/availability', requireAuth, requireTutor, tutorController.getAvailability);
 router.post('/availability', requireAuth, requireTutor, tutorController.addAvailability);

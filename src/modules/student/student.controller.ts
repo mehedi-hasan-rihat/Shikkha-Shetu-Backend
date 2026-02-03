@@ -42,9 +42,24 @@ const updateProfile = async (req: Request, res: Response) => {
     }
 };
 
+const cancelBooking = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id;
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ error: "Booking ID is required" });
+        }
+        const booking = await studentService.cancelBooking(userId, id);
+        res.json(booking);
+    } catch (error: any) {
+        res.status(500).json({ error: "Failed to cancel booking", details: error.message });
+    }
+};
+
 export const studentController = {
     getDashboard,
     getBookings,
+    cancelBooking,
     getProfile,
     updateProfile,
 };

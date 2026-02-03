@@ -8,6 +8,7 @@ import tutorRoutes from './modules/tutor/tutor.routes';
 import studentRoutes from './modules/student/student.routes';
 import adminRoutes from './modules/admin/admin.routes';
 import bookingRoutes from './modules/booking/booking.routes';
+import reviewRoutes from './modules/review/review.routes';
 
 
 dotenv.config();
@@ -35,9 +36,10 @@ app.all('/api/auth/*', toNodeHandler(auth));
 
 // Module routes
 app.use('/api/tutors', tutorRoutes);
-app.use('/api/student', studentRoutes);
+app.use('/api/students', studentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use('/api/categories', adminRoutes);
 
 

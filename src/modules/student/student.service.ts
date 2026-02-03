@@ -72,9 +72,36 @@ const updateStudentProfile = async (userId: string, data: any) => {
     });
 };
 
+const cancelBooking = async (userId: string, bookingId: string) => {
+    const booking = await prisma.booking.findUnique({
+        where: { id: bookingId }
+    });
+    
+    if (!booking) {
+        throw new Error("Booking not found");
+    }
+    
+    if (booking.studentId !== userId) {
+        throw new Error("Not authorized to cancel this booking");
+    }
+    
+    if (booking.status === "COMPLETED") {
+        throw new Error("Cannot cancel completed booking");
+    }
+    
+    return prisma.booking.update({
+        where: { id: bookingId },
+        data: { status: "CANCELLED" },
+        include: {
+            tutor: { select: { name: true, email: true } }
+        }
+    });
+};
+
 export const studentService = {
     getDashboardData,
     getStudentBookings,
+    cancelBooking,
     getStudentProfile,
     updateStudentProfile,
 };

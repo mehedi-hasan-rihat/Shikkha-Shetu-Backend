@@ -42,6 +42,16 @@ const getProfile = async (req: Request, res: Response) => {
     }
 };
 
+const getBookings = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id;
+        const bookings = await tutorService.getTutorBookings(userId);
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch bookings" });
+    }
+};
+
 const createProfile = async (req: Request, res: Response) => {
     try {
         const userId = req.user!.id;
@@ -58,6 +68,20 @@ const createProfile = async (req: Request, res: Response) => {
         res.status(201).json(profile);
     } catch (error) {
         res.status(500).json({ error: "Failed to create profile" });
+    }
+};
+
+const completeBooking = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id;
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ error: "Booking ID is required" });
+        }
+        const booking = await tutorService.completeBooking(userId, id);
+        res.json(booking);
+    } catch (error: any) {
+        res.status(500).json({ error: "Failed to complete booking", details: error.message });
     }
 };
 
@@ -142,6 +166,8 @@ export const tutorController = {
     getAllTutors,
     getTutorById,
     getProfile,
+    getBookings,
+    completeBooking,
     createProfile,
     updateProfile,
     getAvailability,
