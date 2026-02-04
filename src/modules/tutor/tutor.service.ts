@@ -23,30 +23,87 @@ const findAllTutors = async (filters?: {
     minRate?: number;
     maxRate?: number;
     rating?: number;
+    search?: string;
+    subjects?: string;
+    page?: number;
+    limit?: number;
 }) => {
     
     const where: any = {};
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 10;
+    const skip = (page - 1) * limit;
     
+    // Category filter - support both ID and name
     if (filters?.category) {
-        where.category = { name: { contains: filters.category, mode: 'insensitive' } };
+        console.log('Applying category filter:', filters.category);
+        // Check if it looks like an ID (starts with 'cml' or 'cat_') or is a name
+        if (filters.category.startsWith('cml') || filters.category.startsWith('cat_')) {
+            where.categoryId = filters.category;
+        } else {
+            where.category = { name: { contains: filters.category, mode: 'insensitive' } };
+        }
     }
+    
+    // Price range filter
     if (filters?.minRate || filters?.maxRate) {
         where.hourlyRate = {};
         if (filters.minRate) where.hourlyRate.gte = filters.minRate;
         if (filters.maxRate) where.hourlyRate.lte = filters.maxRate;
     }
+    
+    // Rating filter
     if (filters?.rating) {
         where.rating = { gte: filters.rating };
     }
     
-    return prisma.tutorProfile.findMany({
-        where,
-        include: {
-            category: true,
-            availabilitySlots: true,
-            user: { select: { name: true, email: true, image: true } },
-        },
-    });
+    // Search filter (name, bio, subjects)
+    if (filters?.search) {
+        where.OR = [
+            { user: { name: { contains: filters.search, mode: 'insensitive' } } },
+            { bio: { contains: filters.search, mode: 'insensitive' } },
+            { subjects: { hasSome: [filters.search] } }
+        ];
+    }
+    
+    // Subject filter
+    if (filters?.subjects) {
+        const subjectArray = filters.subjects.split(',').map(s => s.trim());
+        where.subjects = { hasSome: subjectArray };
+    }
+    
+    const [tutors, total] = await Promise.all([
+        prisma.tutorProfile.findMany({
+            where,
+            include: {
+                category: true,
+                availabilitySlots: true,
+                user: { select: { name: true, email: true, image: true } },
+            },
+            orderBy: [
+                { rating: 'desc' },
+                { totalReviews: 'desc' }
+            ],
+            skip,
+            take: limit
+        }),
+        prisma.tutorProfile.count({ where })
+    ]);
+    
+    console.log('Database query - found tutors:', tutors.length, 'total count:', total);
+    console.log('Where clause used:', JSON.stringify(where, null, 2));
+    
+    return {
+        tutors,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page < Math.ceil(total / limit),
+            hasPrev: page > 1
+        }
+    };
 };
 
 const findTutorById = async (id: string) => {

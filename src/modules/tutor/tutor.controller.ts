@@ -4,18 +4,26 @@ import { prisma } from "../../lib/prisma";
 
 const getAllTutors = async (req: Request, res: Response) => {
     try {
-        const { category, minRate, maxRate, rating } = req.query;
+        const { category, minRate, maxRate, rating, search, subjects, page, limit } = req.query;
+        console.log('getAllTutors query params:', req.query);
+        
         const filters: any = {};
         
         if (category) filters.category = category as string;
         if (minRate) filters.minRate = parseFloat(minRate as string);
         if (maxRate) filters.maxRate = parseFloat(maxRate as string);
         if (rating) filters.rating = parseFloat(rating as string);
+        if (search) filters.search = search as string;
+        if (subjects) filters.subjects = subjects as string;
+        if (page) filters.page = parseInt(page as string);
+        if (limit) filters.limit = parseInt(limit as string);
         
-        const tutors = await tutorService.findAllTutors(filters);
-        res.json(tutors);
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch tutors" });
+        console.log('Processed filters:', filters);
+        
+        const result = await tutorService.findAllTutors(filters);
+        res.json(result);
+    } catch (error: any) {
+        res.status(500).json({ error: "Failed to fetch tutors", details: error.message });
     }
 };
 
