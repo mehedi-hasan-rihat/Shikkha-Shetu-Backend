@@ -11,6 +11,16 @@ export const auth = betterAuth({
         autoSignIn: true,
         requireEmailVerification: false,
     },
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60, // 5 minutes
+        },
+    },
+    advanced: {
+        cookiePrefix: "better-auth",
+        useSecureCookies: process.env.NODE_ENV === "production",
+    },
     user: {
         additionalFields: {
             role: {
@@ -81,5 +91,9 @@ export const auth = betterAuth({
     },
 
     trustedOrigins: [
-        process.env.APP_URL!, process.env.BETTER_AUTH_URL! , "http://localhost:4000"   ],
+        process.env.APP_URL!,
+        process.env.PROD_APP_URL!,
+        process.env.APP_URL!,
+        process.env.BETTER_AUTH_URL!
+    ],
 });
