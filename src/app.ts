@@ -40,7 +40,6 @@ app.use('/api/students', studentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/categories', adminRoutes);
 
 
 app.get('/', (req, res) => {
