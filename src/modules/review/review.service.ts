@@ -51,7 +51,7 @@ const updateTutorRating = async (tutorId: string) => {
     });
     
     if (reviews.length > 0) {
-        const avgRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+        const avgRating = reviews.reduce((sum: number, review) => sum + review.rating, 0) / reviews.length;
         
         // Find tutor profile by userId
         const tutorProfile = await prisma.tutorProfile.findUnique({
