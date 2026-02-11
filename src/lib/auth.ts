@@ -13,8 +13,7 @@ export const auth = betterAuth({
     },
     session: {
         cookieCache: {
-            enabled: true,
-            maxAge: 5 * 60, // 5 minutes
+            enabled: false, // Disable cookies for JWT token-based auth
         },
     },
     advanced: {

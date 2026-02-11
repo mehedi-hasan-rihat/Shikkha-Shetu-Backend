@@ -1,18 +1,35 @@
 // src/middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
 import { auth } from "../lib/auth";
+import { prisma } from "../lib/prisma";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const session = await auth.api.getSession({ headers: req.headers as any });
-    if (!session?.user) {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    console.log("Auth Middleware - Token:", token);
+
+    if (!token) {
       return res.status(401).json({ error: "Unauthorized - please login" });
     }
-    // console.log("Authenticated user:", session.user);
-    req.user = { ...session.user, role: session.user.role as any }; // cast role to proper type
+
+    // Query session directly from database
+    const session = await prisma.session.findUnique({
+      where: { token },
+      include: { user: true }
+    });
+    console.log("Session found:", session ? "Yes" : "No");
+    console.log("Session expired:", session ? session.expiresAt < new Date() : "N/A");
+
+    if (!session || session.expiresAt < new Date()) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    req.user = { ...session.user, role: session.user.role as any };
     next();
-  } catch (err) {
-    res.status(401).json({ error: "Session invalid" });
+  } catch (err: any) {
+    console.error("Auth error:", err.message);
+    res.status(401).json({ error: "Invalid token" });
   }
 };
 
